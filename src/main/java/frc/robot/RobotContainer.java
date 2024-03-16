@@ -28,6 +28,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LimelightInterface;
 import frc.robot.subsystems.PoseEstimator;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.PDH;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 
 
@@ -50,6 +51,7 @@ public class RobotContainer {
 	public static final IntakeSubsystem INTAKE = new IntakeSubsystem();
 	public static final CameraSubsystem CAMERA = new CameraSubsystem();
 	public static final LimelightInterface LIMELIGHT_INTERFACE = new LimelightInterface();
+	private static final PDH PDH = new PDH();
 
 	public static final CommandXboxController driveController =
 			new CommandXboxController(OperatorConstants.driverControllerPort);
