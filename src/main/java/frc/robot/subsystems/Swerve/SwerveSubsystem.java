@@ -22,16 +22,16 @@ import frc.robot.Constants.Constants;
 import frc.robot.Constants.Constants.SwerveConstants;
 import frc.robot.Constants.SwerveModuleConfiguration;
 
-import java.util.Map;
-
-import org.littletonrobotics.junction.Logger;
-
 import static frc.robot.Constants.Constants.SwerveConstants.dtSeconds;
 import static frc.robot.Constants.Constants.robotLength;
 import static frc.robot.Constants.Constants.robotWidth;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
 public class SwerveSubsystem extends SubsystemBase {
+
+	public SwerveSubsystem() {
+		setUpPathPlanner();
+	}
 	public void velocityGraphUpdate(double xVelocity, double yVelocity){
 		SmartDashboard.putNumber("xVelocity Graph", xVelocity);
 		SmartDashboard.putNumber("yVelocity Graph", yVelocity);
@@ -67,31 +67,6 @@ public class SwerveSubsystem extends SubsystemBase {
 		return states;
 	  }
 
-	public SwerveSubsystem() {
-		setUpPathPlanner();
-	}
-	public void setUpPathPlanner() {
-		AutoBuilder.configureHolonomic(
-			this::getCurrentPose, 
-			this::resetOdom, 
-			this::getChassisSpeedsAuto, 
-			this::drive, 
-			Constants.PATH_FOLLOWER_CONFIG,
-			() -> {
-				// Boolean supplier that controls when the path will be mirrored for the red alliance
-				// This will flip the path being followed to the red side of the field.
-				// THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-				var alliance = DriverStation.getAlliance();
-				if (alliance.isPresent()) {
-					return alliance.get() == DriverStation.Alliance.Red;
-				}
-				return false;
-			},
-			this
-    );
-	}
-	
 
 	public ChassisSpeeds getChassisSpeedsAuto() {
 		return kinematics.toChassisSpeeds(getModuleStates());
@@ -100,8 +75,9 @@ public class SwerveSubsystem extends SubsystemBase {
 	public ChassisSpeeds getChassisSpeedsTeleop(double xVelocity, double yVelocity, double rotationalVelocity) {
 		return ChassisSpeeds.discretize(ChassisSpeeds.fromFieldRelativeSpeeds(xVelocity, yVelocity, rotationalVelocity, POSE_ESTIMATOR.getEstimatedPose().getRotation()),0.02);
 	}
-	public void drive(ChassisSpeeds speeds) {
-	SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+	public void driveRobotRelative(ChassisSpeeds speeds) {
+		ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+	SwerveModuleState[] states = kinematics.toSwerveModuleStates(targetSpeeds);
 		for (int i = 0; i < modules.length; i++) {
 			modules[i].setState(states[i]);
 		}
@@ -126,6 +102,27 @@ public class SwerveSubsystem extends SubsystemBase {
 			modules[i].setState(states[i]);
 		}
 	}
+	public void setUpPathPlanner() {
+		AutoBuilder.configureHolonomic(
+				this::getCurrentPose,
+				this::resetOdom,
+				this::getChassisSpeedsAuto,
+				this::driveRobotRelative,
+				Constants.PATH_FOLLOWER_CONFIG,
+				() -> {
+					// Boolean supplier that controls when the path will be mirrored for the red alliance
+					// This will flip the path being followed to the red side of the field.
+					// THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+					var alliance = DriverStation.getAlliance();
+					if (alliance.isPresent()) {
+						return alliance.get() == DriverStation.Alliance.Red;
+					}
+					return false;
+				},
+				this
+		);
+	}
 	/*
 	* The two commands below are commands to follow a single path for two different "phases", teleop and auto.
 	* The command that I tested was the teleop one, but to actually get the right velocities to use them with a pigeon and gyro
@@ -145,7 +142,7 @@ public class SwerveSubsystem extends SubsystemBase {
 				path,
 				this::getCurrentPose, // Robot pose supplier
 				this::getChassisSpeedsAuto,// ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-				this::drive, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+				this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
 				new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
 						new PIDConstants(1.5, 0.0, 0.0), // Translation PID constants
 						new PIDConstants(2.5, 0.0, 0.0), // Rotation PID constants
