@@ -3,7 +3,7 @@
   "startingPose": {
     "position": {
       "x": 1.0,
-      "y": 4.0
+      "y": 7.0
     },
     "rotation": 0
   },
@@ -14,12 +14,12 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Leave Middle"
+            "pathName": "Idle Left"
           }
         }
       ]
     }
   },
-  "folder": null,
+  "folder": "Idles & Leaves",
   "choreoAuto": false
 }

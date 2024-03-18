@@ -14,12 +14,12 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Stay Still Right"
+            "pathName": "Idle Right"
           }
         }
       ]
     }
   },
-  "folder": null,
+  "folder": "Idles & Leaves",
   "choreoAuto": false
 }
