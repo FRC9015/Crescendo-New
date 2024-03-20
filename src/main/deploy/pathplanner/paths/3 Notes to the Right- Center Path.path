@@ -87,7 +87,7 @@
   "eventMarkers": [
     {
       "name": "Intake Note 1",
-      "waypointRelativePos": 0.35,
+      "waypointRelativePos": 0.55,
       "command": {
         "type": "parallel",
         "data": {
@@ -104,7 +104,7 @@
     },
     {
       "name": "Shoot Note 1",
-      "waypointRelativePos": 0.6,
+      "waypointRelativePos": 1.95,
       "command": {
         "type": "parallel",
         "data": {
@@ -112,7 +112,7 @@
             {
               "type": "named",
               "data": {
-                "name": "shootNote"
+                "name": "autoAim"
               }
             }
           ]
@@ -149,7 +149,7 @@
     "rotateFast": false
   },
   "reversed": false,
-  "folder": "Test Paths",
+  "folder": null,
   "previewStartingState": {
     "rotation": 0,
     "velocity": 0
