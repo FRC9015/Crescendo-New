@@ -30,6 +30,8 @@ import static frc.robot.Constants.Constants.robotWidth;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
 public class SwerveSubsystem extends SubsystemBase {
+
+	public static double slowSpeedMultiplier = 1;
 	public void velocityGraphUpdate(double xVelocity, double yVelocity){
 		SmartDashboard.putNumber("xVelocity Graph", xVelocity);
 		SmartDashboard.putNumber("yVelocity Graph", yVelocity);
@@ -163,6 +165,13 @@ public class SwerveSubsystem extends SubsystemBase {
 				this // Reference to this subsystem to set requirements
 		);
 	}
+	public Command slowMode(){
+		return this.startEnd(
+				()-> slowSpeedMultiplier = 0.7,
+				()-> slowSpeedMultiplier = 1
+		);
+	}
+
 
 
 	@Override
