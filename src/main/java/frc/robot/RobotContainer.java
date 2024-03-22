@@ -60,7 +60,10 @@ public class RobotContainer {
 	public RobotContainer() {
 		// Configure the trigger bindings
 		NamedCommands.registerCommand("shootNote", SHOOTER.autoShootNoteToSpeaker());
-		NamedCommands.registerCommand("intakeNote", INTAKE.autoIntakeNote());
+		NamedCommands.registerCommand("intakeNote", (new Handoff(INTAKE,SHOOTER)
+				.until(INTAKE::noteInPosition)
+					.andThen(SHOOTER::shootNoteToAmp)
+					.withTimeout(0.01)));
 		NamedCommands.registerCommand("outtakeNote", INTAKE.outtakeNote());
 		NamedCommands.registerCommand("stopSpeakerShooter", SHOOTER.stopShooter());
 		NamedCommands.registerCommand("intakeAmp", SHOOTER.autoAmpIntake());
@@ -93,7 +96,10 @@ public class RobotContainer {
 
 				// Driver Bindings
 				InputManager.getInstance().getDriverButton(InputManager.Button.LB_Button5).whileTrue(INTAKE.outtakeNote());
-				InputManager.getInstance().getDriverButton(InputManager.Button.RB_Button6).whileTrue(new Handoff(INTAKE,SHOOTER).until(SHOOTER.getSensor()).andThen(SHOOTER.shooterBackward().withTimeout(0.2)));
+				InputManager.getInstance().getDriverButton(InputManager.Button.RB_Button6).whileTrue(new Handoff(INTAKE,SHOOTER)
+						.until(INTAKE::noteInPosition)
+							.andThen(SHOOTER::shootNoteToAmp)
+							.withTimeout(0.01));
 				InputManager.getInstance().getDriverButton(InputManager.Button.Y_Button4).onTrue(new InstantCommand(PIGEON::zeroYaw));
 
 				// Operator Bindings

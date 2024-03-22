@@ -2,12 +2,12 @@ package frc.robot.subsystems;
 
 import com.revrobotics.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.Constants.PivotConstants;
-
 
 public class PivotSubsystem extends SubsystemBase {
 
@@ -16,7 +16,8 @@ public class PivotSubsystem extends SubsystemBase {
     public final CANSparkFlex pivotMotor2 = new CANSparkFlex(PivotConstants.pivotMotor2ID, CANSparkLowLevel.MotorType.kBrushless);
 
     //gets encoders
-    public final RelativeEncoder pivotEncoder = pivotMotor1.getEncoder();//change later
+    public final RelativeEncoder pivotEncoder = pivotMotor1.getEncoder();
+    private final DigitalOutput pivotSensor = new DigitalOutput(2); // TODO Reset when activated in periodic
 
 
     //makes PID for motors
@@ -44,7 +45,6 @@ public class PivotSubsystem extends SubsystemBase {
 
         pivotMotor2.follow(pivotMotor1,true);
         //makes encoder account for gear box/Chain
-        //pivotEncoder.setDistancePerRotation((double) 1 /3);
         pivotEncoder.setPositionConversionFactor(1.0/15);
     }
 
@@ -71,8 +71,7 @@ public class PivotSubsystem extends SubsystemBase {
     }
     //moves pivot up
     private void movePivotUp(){
-        double motorSpeed = 0.05;
-        currentPosition += motorSpeed;
+        currentPosition += 0.05;
     }
     //stops pivot
     private void stopPivot(){
@@ -81,8 +80,7 @@ public class PivotSubsystem extends SubsystemBase {
     }
     //moves pivot
     private void movePivotDown(){
-        double motorSpeed = -0.05;
-        currentPosition += motorSpeed;
+        currentPosition -= 0.05;
     }
 
     //uses SparkMax PID to set the motors to a position
@@ -98,14 +96,14 @@ public class PivotSubsystem extends SubsystemBase {
     public void SubWoofer(){
         pivotPIDController.setP(0.4);
         currentPosition = 0;
-        
+
     }
 
     //uses SparkMax PID to set the motors to a position
     public void AmpPreset(){
         pivotPIDController.setP(1.5);
         currentPosition = 1.3;
-        
+
     }
 
     public void passNotePreset(){
@@ -121,14 +119,14 @@ public class PivotSubsystem extends SubsystemBase {
     @Override
     public void periodic(){
         //puts values on dashboard
-        SmartDashboard.putNumber("pivot Position", pivotEncoder.getPosition());
-        
+        SmartDashboard.putBoolean("pivot zeroed", pivotSensor.get());
+
         double kDt = 0.02;
         motor1Setpoint = pivot1Profile.calculate(kDt,motor1Setpoint,motor1Goal);
         motor2Setpoint = pivot2Profile.calculate(kDt,motor2Setpoint,motor2Goal);
         //uses robotSelf booleans to decide if to run a command
 
         pivotPIDController.setReference(currentPosition, CANSparkFlex.ControlType.kPosition);
-        
+
     }
 }
