@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -13,8 +14,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.Constants.IntakeConstants;
 
-import java.util.function.BooleanSupplier;
-
 public class IntakeSubsystem extends SubsystemBase {
     private final DigitalOutput speakerSensor = new DigitalOutput(0);
     private final DigitalOutput handoffSensor = new DigitalOutput(1);
@@ -22,13 +21,19 @@ public class IntakeSubsystem extends SubsystemBase {
             new CANSparkFlex(IntakeConstants.intakeMotor1ID, MotorType.kBrushless),
     };
     private final CANSparkFlex handoffMotor = new CANSparkFlex(IntakeConstants.handoffMotorID, MotorType.kBrushless);
-    RelativeEncoder handoffMotorEncoder = handoffMotor.getEncoder();
-
     public IntakeSubsystem(){
         for (CANSparkFlex motor:intakeMotors){
             motor.setSmartCurrentLimit(30);
+            motor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 1000);
+            motor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 1000);
+            motor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 1000);
+            motor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 1000);
         }
-    }
+        handoffMotor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 1000);
+        handoffMotor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 1000);
+        handoffMotor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 1000);
+        handoffMotor.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 1000);
+        }
 
     public Command intakeNote(){
         return this.startEnd(
@@ -86,16 +91,10 @@ public class IntakeSubsystem extends SubsystemBase {
         handoffMotor.stopMotor();
     }
 
-    public double getHandoffMotorRPM(){
-        return handoffMotorEncoder.getVelocity();
-    }
     public boolean noteInPosition() {
         return speakerSensor.get();
     }
 
-    public boolean intakeRunning(){
-        return (getHandoffMotorRPM()>=0.3*6784);
-    }
     public boolean getHandoffStatus(){
 
         return handoffSensor.get();
