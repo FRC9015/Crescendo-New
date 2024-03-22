@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -63,12 +62,6 @@ Logger.start();
 	 */
 	@Override
 	public void robotPeriodic() {
-		if (isEnabled()) {
-			RobotContainer.LEDS.indicateNote();
-			RobotContainer.LEDS.indicateShooter();
-			RobotContainer.LEDS.updateLEDs();
-		}
-
 		// Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
 		// commands, running already-scheduled commands, removing finished or interrupted commands,
 		// and running subsystem periodic() methods.  This must be called from the robot's periodic
@@ -93,9 +86,6 @@ Logger.start();
 		if(m_autonomousCommand != null){
 			m_autonomousCommand.schedule();
 		}
-
-		
-	
 		// schedule the autonomous command (example)
 	}
 
