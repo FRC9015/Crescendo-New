@@ -21,13 +21,7 @@ import frc.robot.Commands.Presets.AmpPreset;
 import frc.robot.Commands.Presets.PassNotePreset;
 import frc.robot.Commands.Presets.SubWooferPreset;
 import frc.robot.Constants.Constants.OperatorConstants;
-import frc.robot.subsystems.Pigeon;
-import frc.robot.subsystems.PivotSubsystem;
-import frc.robot.subsystems.CameraSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.LimelightInterface;
-import frc.robot.subsystems.PoseEstimator;
-import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.*;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 
 
@@ -50,6 +44,7 @@ public class RobotContainer {
 	public static final IntakeSubsystem INTAKE = new IntakeSubsystem();
 	//public static final CameraSubsystem CAMERA = new CameraSubsystem();
 	public static final LimelightInterface LIMELIGHT_INTERFACE = new LimelightInterface();
+	public static final LEDSubsystem LEDS = new LEDSubsystem();
 
 	public static final CommandXboxController driveController =
 			new CommandXboxController(OperatorConstants.driverControllerPort);
