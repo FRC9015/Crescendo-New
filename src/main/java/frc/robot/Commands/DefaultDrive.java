@@ -54,9 +54,9 @@ public class DefaultDrive extends Command {
 		double inputDir = Math.atan2(inputY, inputX);
 		double forwardDirectionSign = (DriverStation.getAlliance().orElse(Alliance.Red).equals(Alliance.Red) ? -1.0 : 1.0);
 
-		double xVelocity = xVelocityFilter.calculate(cos(inputDir) * inputMagnitude * maxSpeed * forwardDirectionSign);
+		double xVelocity = xVelocityFilter.calculate(cos(inputDir) * inputMagnitude * maxSpeed * forwardDirectionSign * SWERVE.speedMultiplier);
 
-		double yVelocity = yVelocityFilter.calculate(sin(inputDir) * inputMagnitude * maxSpeed * forwardDirectionSign);
+		double yVelocity = yVelocityFilter.calculate(sin(inputDir) * inputMagnitude * maxSpeed * forwardDirectionSign * SWERVE.speedMultiplier);
 
 		double rotationalVelocity = (inputZ * angularSpeed );
 
