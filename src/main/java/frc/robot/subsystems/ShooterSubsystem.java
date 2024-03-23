@@ -58,12 +58,10 @@ public class ShooterSubsystem extends SubsystemBase {
                 new WaitCommand(3),
                 new InstantCommand(this::setAmpIntakeSpeeds),
                 new WaitCommand(1),
-                new InstantCommand(this::stopSpeakerShooterMotors),
-                new InstantCommand(this::stopAmpShooterMotorSpeeds));
-               
+                new InstantCommand(this::stopAmpShooterMotorSpeeds),
+                new InstantCommand(this::stopSpeakerShooterMotors));
     }
 
-    
     public Command shootNoteToAmp() {
         return this.startEnd(
                 this::setAmpShooterMotorSpeeds,
@@ -83,10 +81,6 @@ public class ShooterSubsystem extends SubsystemBase {
         );
     }
 
-    public Command stopAmp(){
-        return this.runOnce(this::stopAmpShooterMotorSpeeds);
-    }
-
     public Command shooterBackward(){
         return this.startEnd(
                 this::backwardsShooter,
@@ -96,7 +90,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public Command autoAmpIntake(){
         return new SequentialCommandGroup(
                 new InstantCommand(this::setAmpIntakeSpeeds),
-                new WaitCommand( 1.5),
+                new WaitCommand(1),
                 new InstantCommand(this::stopAmpShooterMotorSpeeds));
     }
 
@@ -108,7 +102,7 @@ public class ShooterSubsystem extends SubsystemBase {
 }
     
     public void setSpeakerShooterMotorSpeedsSubWoofer(){
-        speakerMotorTop.set(0.5);
+        speakerMotorTop.set(0.7);
         speakerMotorBottom.set(0.5);
     }
 

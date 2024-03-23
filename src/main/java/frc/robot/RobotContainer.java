@@ -15,12 +15,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Commands.DefaultDrive;
-import frc.robot.Commands.Handoff;
 import frc.robot.Commands.AutoAim;
-import frc.robot.Commands.autoHandoff;
+import frc.robot.Commands.Handoff;
 import frc.robot.Commands.Presets.AmpPreset;
 import frc.robot.Commands.Presets.PassNotePreset;
-
+import frc.robot.Commands.Presets.SubWooferPreset;
 import frc.robot.Constants.Constants.OperatorConstants;
 import frc.robot.subsystems.Pigeon;
 import frc.robot.subsystems.PivotSubsystem;
@@ -61,9 +60,7 @@ public class RobotContainer {
 	public RobotContainer() {
 		// Configure the trigger bindings
 		NamedCommands.registerCommand("shootNote", SHOOTER.autoShootNoteToSpeaker());
-		
 		NamedCommands.registerCommand("intakeNote", INTAKE.autoIntakeNote());
-
 		NamedCommands.registerCommand("outtakeNote", INTAKE.outtakeNote());
 		NamedCommands.registerCommand("stopSpeakerShooter", SHOOTER.stopShooter());
 		NamedCommands.registerCommand("intakeAmp", SHOOTER.autoAmpIntake());
@@ -96,8 +93,8 @@ public class RobotContainer {
 
 				// Driver Bindings
 				InputManager.getInstance().getDriverButton(InputManager.Button.LB_Button5).whileTrue(INTAKE.outtakeNote());
-				InputManager.getInstance().getDriverButton(InputManager.Button.RB_Button6).whileTrue(new Handoff(INTAKE,SHOOTER));
-				InputManager.getInstance().getDriverButton(InputManager.Button.Y_Button4).onTrue(new InstantCommand(POSE_ESTIMATOR::resetOdometry));
+				InputManager.getInstance().getDriverButton(InputManager.Button.RB_Button6).whileTrue(new Handoff(INTAKE,SHOOTER).until(SHOOTER.getSensor()).andThen(SHOOTER.shooterBackward().withTimeout(0.2)));
+				InputManager.getInstance().getDriverButton(InputManager.Button.Y_Button4).onTrue(new InstantCommand(PIGEON::zeroYaw));
 
 				// Operator Bindings
 				InputManager.getInstance().getOperatorButton(InputManager.Button.RB_Button6).whileTrue(SHOOTER.shootNoteToAmp());
@@ -108,7 +105,7 @@ public class RobotContainer {
 				
 				// Operator Presets
 				InputManager.getInstance().getOperatorButton(InputManager.Button.Y_Button4).whileTrue(new AmpPreset());
-				InputManager.getInstance().getOperatorButton(InputManager.Button.A_Button1).whileTrue(PIVOT.movePivotToSubWoofer());
+				InputManager.getInstance().getOperatorButton(InputManager.Button.A_Button1).whileTrue(new SubWooferPreset());
 				InputManager.getInstance().getOperatorButton(InputManager.Button.X_Button3).whileTrue(new PassNotePreset());
 	}
 

@@ -62,7 +62,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public Command autoIntakeNote(){
        return new SequentialCommandGroup(
                 new InstantCommand(this::setIntakeMotorSpeeds),
-                new WaitCommand(1.5),
+                new WaitCommand(2),
                 new InstantCommand(this::stopIntakeMotors));
    }
 
