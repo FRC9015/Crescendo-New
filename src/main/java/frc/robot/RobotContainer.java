@@ -19,7 +19,7 @@ import frc.robot.Commands.AutoAim;
 import frc.robot.Commands.Handoff;
 import frc.robot.Commands.Presets.AmpPreset;
 import frc.robot.Commands.Presets.PassNotePreset;
-import frc.robot.Commands.Presets.ShootNoteSubwoofer;
+import frc.robot.Commands.Presets.SubWooferPreset;
 import frc.robot.Constants.Constants.OperatorConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
@@ -55,7 +55,10 @@ public class RobotContainer {
 	public RobotContainer() {
 		// Configure the trigger bindings
 		NamedCommands.registerCommand("shootNote", SHOOTER.autoShootNoteToSpeaker());
-		NamedCommands.registerCommand("intakeNote", INTAKE.autoIntakeNote());
+		NamedCommands.registerCommand("intakeNote", (new Handoff(INTAKE,SHOOTER)
+				.until(INTAKE::noteInPosition)
+					.andThen(SHOOTER::shootNoteToAmp)
+					.withTimeout(0.01)));
 		NamedCommands.registerCommand("outtakeNote", INTAKE.outtakeNote());
 		NamedCommands.registerCommand("stopSpeakerShooter", SHOOTER.stopShooter());
 		NamedCommands.registerCommand("intakeAmp", SHOOTER.autoAmpIntake());
@@ -88,7 +91,10 @@ public class RobotContainer {
 
 				// Driver Bindings
 				InputManager.getInstance().getDriverButton(InputManager.Button.LB_Button5).whileTrue(INTAKE.outtakeNote());
-				InputManager.getInstance().getDriverButton(InputManager.Button.RB_Button6).whileTrue(new Handoff(INTAKE,SHOOTER).until((INTAKE::noteInPosition)));
+				InputManager.getInstance().getDriverButton(InputManager.Button.RB_Button6).whileTrue(new Handoff(INTAKE,SHOOTER)
+						.until(INTAKE::noteInPosition)
+							.andThen(SHOOTER::shootNoteToAmp)
+							.withTimeout(0.01));
 				InputManager.getInstance().getDriverButton(InputManager.Button.Y_Button4).onTrue(new InstantCommand(PIGEON::zeroYaw));
 
 				// Operator Bindings
@@ -100,7 +106,7 @@ public class RobotContainer {
 				
 				// Operator Presets
 				InputManager.getInstance().getOperatorButton(InputManager.Button.Y_Button4).whileTrue(new AmpPreset());
-				InputManager.getInstance().getOperatorButton(InputManager.Button.A_Button1).whileTrue(new ShootNoteSubwoofer());
+				InputManager.getInstance().getOperatorButton(InputManager.Button.A_Button1).whileTrue(new SubWooferPreset());
 				InputManager.getInstance().getOperatorButton(InputManager.Button.X_Button3).whileTrue(new PassNotePreset());
 	}
 
