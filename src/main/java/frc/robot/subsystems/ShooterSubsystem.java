@@ -1,12 +1,10 @@
 
 package frc.robot.subsystems;
-import java.util.function.BooleanSupplier;
 
 import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel;
 import com.revrobotics.CANSparkLowLevel.MotorType;
-
-import edu.wpi.first.wpilibj.DigitalOutput;
+import com.revrobotics.RelativeEncoder;
+import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -16,6 +14,10 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.Constants.ShooterConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
+    private final double motorMaxFreeSpeed = 6784;
+    private boolean shooterIsRunning = false;
+    private BangBangController speakerPIDTop = new BangBangController();
+    private BangBangController speakerPIDBottom = new BangBangController();
     private final CANSparkFlex speakerMotorTop = new CANSparkFlex(ShooterConstants.speakerShooterMotorTopID,
             MotorType.kBrushless);
     private final CANSparkFlex speakerMotorBottom = new CANSparkFlex(ShooterConstants.speakerShooterMotor2ID,
@@ -25,23 +27,21 @@ public class ShooterSubsystem extends SubsystemBase {
             MotorType.kBrushless);
     private final CANSparkFlex ampShooterMotorBottom = new CANSparkFlex(ShooterConstants.ampShooterMotor2ID,
             MotorType.kBrushless);
-    
-    private final DigitalOutput Sensor = new DigitalOutput(0);
+
+    RelativeEncoder speakerMotorTopEncoder = speakerMotorTop.getEncoder();
+    RelativeEncoder speakerMotorBottomEncoder = speakerMotorBottom.getEncoder();
 
     public ShooterSubsystem() {
         speakerMotorTop.setSmartCurrentLimit(40);
         speakerMotorBottom.setSmartCurrentLimit(40);
         ampShooterMotorTop.setSmartCurrentLimit(30);
         ampShooterMotorBottom.setSmartCurrentLimit(30);
+        speakerPIDTop.setTolerance(200);
+        speakerPIDBottom.setTolerance(200);
+    }
 
-        speakerMotorTop.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 1000);
-        speakerMotorTop.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 1000);
-        speakerMotorBottom.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 1000);
-        speakerMotorBottom.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 1000);
-        ampShooterMotorTop.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 1000);
-        ampShooterMotorTop.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 1000);
-        ampShooterMotorBottom.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 1000);
-        ampShooterMotorBottom.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 1000);
+    public double motorVelocity(RelativeEncoder encoder){
+        return encoder.getVelocity();
     }
 
     public Command shootNoteToSpeaker() {
@@ -66,7 +66,14 @@ public class ShooterSubsystem extends SubsystemBase {
         return this.startEnd(
                 this::setAmpShooterMotorSpeeds,
                 this::stopAmpShooterMotorSpeeds
-                );
+        );
+    }
+
+    public Command autoShootNoteToAmp(){
+        return new SequentialCommandGroup(
+                new InstantCommand(this::setAmpShooterMotorSpeeds),
+                new WaitCommand(1),
+                new InstantCommand(this::stopAmpShooterMotorSpeeds));
     }
 
     public Command stopShooter() {
@@ -79,6 +86,10 @@ public class ShooterSubsystem extends SubsystemBase {
                 this::setAmpIntakeSpeeds,
                 this::stopAmpShooterMotorSpeeds
         );
+    }
+
+    public Command stopAmp(){
+        return this.runOnce(this::stopAmpShooterMotorSpeeds);
     }
 
     public Command shooterBackward(){
@@ -96,26 +107,29 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public Command autoBackwardShooter(){
         return new SequentialCommandGroup(
-            new InstantCommand(this::backwardsShooter),
-            new WaitCommand(3),
-            new InstantCommand(this::stopSpeakerShooterMotors));
-}
-    
+                new InstantCommand(this::backwardsShooter),
+                new WaitCommand(3),
+                new InstantCommand(this::stopSpeakerShooterMotors));
+    }
+
     public void setSpeakerShooterMotorSpeedsSubWoofer(){
-        speakerMotorTop.set(0.7);
-        speakerMotorBottom.set(0.5);
+        speakerPIDTop.setSetpoint(0.7 * motorMaxFreeSpeed);
+        speakerPIDBottom.setSetpoint(0.5 * motorMaxFreeSpeed);
+        shooterIsRunning=true;
     }
 
     public void setSpeakerShooterMotorSpeeds(){
-        speakerMotorTop.set(0.8);
-        speakerMotorBottom.set(0.6);
+        speakerPIDTop.setSetpoint(0.8 * motorMaxFreeSpeed);
+        speakerPIDBottom.setSetpoint(0.6 * motorMaxFreeSpeed);
+        shooterIsRunning=true;
+
     }
 
     public void stopSpeakerShooterMotors() {
         speakerMotorTop.stopMotor();
         speakerMotorBottom.stopMotor();
+        shooterIsRunning=false;
     }
-    
 
     private void setAmpShooterMotorSpeeds() {
         double motorSpeed = 0.5;// needs to be tuned
@@ -135,21 +149,23 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     private void backwardsShooter(){
-        speakerMotorTop.set(-0.1);
-        speakerMotorBottom.set(-0.1);
+        speakerPIDTop.setSetpoint(-0.8 * motorMaxFreeSpeed);
+        speakerPIDBottom.setSetpoint(-0.8 * motorMaxFreeSpeed);
+        shooterIsRunning=true;
     }
-   
-    public BooleanSupplier getSensor(){
-        return () -> Sensor.get();
-    }
-    public Boolean getSensorBoolean(){
-        return Sensor.get();
+
+    public boolean shooterIsReady(){
+        return (speakerPIDTop.atSetpoint() && speakerPIDBottom.atSetpoint() && shooterIsRunning);
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Shooter sensor", Sensor.get());
+        if (shooterIsRunning) {
+            speakerMotorTop.setVoltage(speakerPIDTop.calculate(motorVelocity(speakerMotorTopEncoder)) * 10);
+            speakerMotorBottom.setVoltage(speakerPIDBottom.calculate(motorVelocity(speakerMotorBottomEncoder)) * 10);
+        }
     }
+
 
     @Override
     public void simulationPeriodic() {
