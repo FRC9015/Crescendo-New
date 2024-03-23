@@ -92,10 +92,8 @@ public class RobotContainer {
 				// Driver Bindings
 				InputManager.getInstance().getDriverButton(InputManager.Button.LB_Button5).whileTrue(INTAKE.outtakeNote());
 				InputManager.getInstance().getDriverButton(InputManager.Button.RB_Button6).whileTrue(new Handoff(INTAKE,SHOOTER)
-						.until(INTAKE::noteInPosition)
-							.andThen(SHOOTER::shootNoteToAmp)
-							.withTimeout(0.01));
-				InputManager.getInstance().getDriverButton(InputManager.Button.Y_Button4).onTrue(new InstantCommand(PIGEON::zeroYaw));
+						.until(INTAKE::noteInPosition));
+				InputManager.getInstance().getDriverButton(InputManager.Button.Y_Button4).onTrue(new InstantCommand(POSE_ESTIMATOR::updatePoseEstimator));
 
 				// Operator Bindings
 				InputManager.getInstance().getOperatorButton(InputManager.Button.RB_Button6).whileTrue(SHOOTER.shootNoteToAmp());
